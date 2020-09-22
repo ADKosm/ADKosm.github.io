@@ -1,0 +1,52 @@
+Показываю сервис Play with docker
+
+https://labs.play-with-docker.com/
+
+Показываю, как создать машину
+Показываю, как редактировать файл
+
+----
+Директория simple-script-1
+
+Здесь есть скрипт, он показывает, что вокруг.
+Можно запустить его локально
+Потом собрать докер и запустить в докере
+Мораль - мы умеем собирать докер, паковать в него питон и запускать его.
+
+Команды
+python3 application.py
+
+docker build -t python-in-docker:latest .
+docker run python-in-docker:latest
+
+Важно отметить, что выводы программ отличаются
+
+----
+Директория mount-directory-2
+
+Важно показать application.py
+Показываем одновременно и проброс параметров и монтирование директории
+
+Команды
+python3 application.py /root
+
+docker build -t python-mount:latest .
+
+docker run python-mount:latest /mount-dir  # ломается
+docker run -v /root:/mount-dir python-mount:latest /mount-dir
+docker run -v /:/pipa-pupa python-mount:latest /pipa-pupa
+
+----
+Директория ports-3
+
+Показываем, как запустить простой сервер на питоне
+Потом показываю как его запихать внутрь контейнера
+
+Команды
+python3 -m http.server --bind 0.0.0.0 8000
+
+docker build -t python-server:latest .
+docker run -v /root:/sync-folder -p 9090:8080 python-server:latest
+docker run -v /:/sync-folder -p 9090:8080 python-server:latest
+
+Показать схему

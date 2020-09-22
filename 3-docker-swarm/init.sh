@@ -90,3 +90,5 @@ configs:  # Задаем файлы конфигураций, которые н�
   nginx-config:
     file: ./configuration.nginx
 END
+
+echo 1

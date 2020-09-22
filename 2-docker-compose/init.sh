@@ -41,7 +41,7 @@ WORKDIR /sync-folder
 ENTRYPOINT ["python3", "-m", "http.server", "--bind", "0.0.0.0", "8080"]
 END
 
-cat > $DIR/proxy-system-2/Dockerfile <<END
+cat > $DIR/proxy-system-2/configuration.nginx <<END
 user root;
 worker_processes  4;
 

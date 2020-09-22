@@ -1,0 +1,77 @@
+http://adkosm.github.io/3-docker-swarm/init.sh
+http://adkosm.github.io/3-docker-swarm/init-2.sh
+http://adkosm.github.io/3-docker-swarm/init-3.sh
+
+curl -L http://adkosm.github.io/3-docker-swarm/init.sh | bash
+curl -L http://adkosm.github.io/3-docker-swarm/init-2.sh | bash
+curl -L http://adkosm.github.io/3-docker-swarm/init-3.sh | bash
+
+----
+
+https://labs.play-with-docker.com/
+
+----
+
+Рассказываю про объединение в кластер
+Создаю три машины
+
+На Node 1
+
+docker swarm init --advertise-addr 192.168.0.13
+docker swarm join-token -q worker
+
+Копирую токен и на соседних машинах
+
+docker swarm join --token SWMTKN-1-ABBA 192.168.0.13:2377
+
+----
+
+Теперь иду на Node 1 и запускаю визуалайзер
+
+cat run-vis.sh
+bash run-vis.sh
+
+Открываю 8080 и смотрю на кластер
+
+docker service ls - вижу тоже самое но в терминале
+
+----
+
+Особенности запуска
+* Нужно руками создать сеть между машинами
+
+docker network create --driver overlay backnet
+
+* Для конфигурирования нужно использовать специальный механизм
+* Сборка только локальная. Вместо этого найдем на docker hub уже готовый.
+
+trinitronx/python-simplehttpserver
+https://hub.docker.com/r/trinitronx/python-simplehttpserver
+
+----
+
+Теперь запускаем все все на кластере.
+Вначале смотрим на конфигурацию nginx - видим, что она В ТОЧНОСТИ такая же как и раньше
+
+Смотрим на композ - видим, что он почти такой же за исключением
+* Используем внешнюю сеть
+* Использует конфиги
+* Реплицируем первый сервис
+
+Видим, что наши сервисы подключены теперь к /machine-info. Смотрим, что там.
+
+Запускаем все это дело
+
+docker stack deploy --compose-file docker-compose.yaml file-service
+
+Смотрим опять 8080 - ждем, пока все разогреется
+Смотрим в docker service ls - тоже ждем
+
+Когда готово - идем в 8888 и тыкаем на /file-server-1/
+Обновляем несколько раз. Видим, что меняется.
+
+Идем на /file-server-2/ для проформы.
+
+Смотрим на схему
+
+https://adkosm.github.io/3-docker-swarm/docker-swarm-file-service-scheme.png

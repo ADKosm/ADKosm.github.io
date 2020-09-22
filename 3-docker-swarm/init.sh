@@ -6,42 +6,19 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # -----------------------------------------------------------------------------
 
-mkdir -p $DIR/compose-1
+mkdir -p /machine-info
+touch /machine-info/node-1
 
-cat > $DIR/compose-1/Dockerfile <<END
-FROM python:3.7
-
-WORKDIR /sync-folder
-
-ENTRYPOINT ["python3", "-m", "http.server", "--bind", "0.0.0.0", "8080"]
+cat > $DIR/run-vis.sh <<END
+docker service create \
+  --name=viz \
+  --publish=8080:8080/tcp \
+  --constraint=node.role==manager \
+  --mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
+  dockersamples/visualizer
 END
 
-cat > $DIR/compose-1/docker-compose.yaml <<END
-version: "3.7"
-
-services:
-  file-server:
-    build:
-      context: .  # Указываем директорию, где лежит Dockerfile
-    ports:
-      - 9090:8080  # Указываем, какие порты пробросить
-    volumes:
-      - ./:/sync-folder  # Указываем, какие директории примонтировать
-END
-
-# --------------------------------------------------------------------------------
-
-mkdir -p $DIR/proxy-system-2
-
-cat > $DIR/proxy-system-2/Dockerfile <<END
-FROM python:3.7
-
-WORKDIR /shared/folder
-
-ENTRYPOINT ["python3", "-m", "http.server", "--bind", "0.0.0.0", "8080"]
-END
-
-cat > $DIR/proxy-system-2/configuration.nginx <<END
+cat > $DIR/configuration.nginx <<END
 user root;
 worker_processes  4;
 
@@ -81,24 +58,35 @@ http {
 }
 END
 
-cat > $DIR/proxy-system-2/docker-compose.yaml <<END
+
+cat > $DIR/docker-compose.yaml <<END
 version: "3.7"
 
 services:
   file-server-1:
-    build:
-      context: .
+    image: trinitronx/python-simplehttpserver
+    deploy:
+      mode: replicated
+      replicas: 2  # Добавляем 2 реплики этого сервиса
     volumes:
-      - ./:/shared/folder # Текущая директория
+      - /machine-info:/var/www  # Директория с информацией про машину
   file-server-2:
-    build:
-      context: .
+    image: trinitronx/python-simplehttpserver
     volumes:
-      - /etc:/shared/folder # Директория /etc
+      - /etc:/var/www
   proxy:
     image: nginx:1.17
-    volumes:
-      - ./configuration.nginx:/etc/nginx/nginx.conf:ro
     ports:
       - 8888:8888
+    configs:
+      - source: nginx-config
+        target: /etc/nginx/nginx.conf  # Подключаем конфигурацию
+
+networks:
+  backnet:
+    external: true  # Используем созданную извне сеть с названием backnet
+
+configs:  # Задаем файлы конфигураций, которые необходимо распределить по кластеру
+  nginx-config:
+    file: ./configuration.nginx
 END

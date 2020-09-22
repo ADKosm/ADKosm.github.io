@@ -64,16 +64,16 @@ version: "3.7"
 
 services:
   file-server-1:
-    image: trinitronx/python-simplehttpserver
+    image: halverneus/static-file-server
     deploy:
       mode: replicated
       replicas: 2  # Добавляем 2 реплики этого сервиса
     volumes:
-      - /machine-info:/var/www  # Директория с информацией про машину
+      - /machine-info:/web  # Директория с информацией про машину
   file-server-2:
-    image: trinitronx/python-simplehttpserver
+    image: halverneus/static-file-server
     volumes:
-      - /etc:/var/www
+      - /etc:/web
   proxy:
     image: nginx:1.17
     ports:
@@ -90,5 +90,3 @@ configs:  # Задаем файлы конфигураций, которые н�
   nginx-config:
     file: ./configuration.nginx
 END
-
-echo "Success!"

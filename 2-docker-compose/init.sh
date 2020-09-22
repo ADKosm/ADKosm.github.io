@@ -62,7 +62,7 @@ http {
     access_log  /var/log/nginx/access.log  main;
 
     sendfile            on;
-    tcp_nopush          on;s
+    tcp_nopush          on;
     keepalive_timeout   65;
 
     server {

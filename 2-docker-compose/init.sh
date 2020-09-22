@@ -36,7 +36,7 @@ mkdir -p $DIR/proxy-system-2
 cat > $DIR/proxy-system-2/Dockerfile <<END
 FROM python:3.7
 
-WORKDIR /sync-folder
+WORKDIR /shared/folder
 
 ENTRYPOINT ["python3", "-m", "http.server", "--bind", "0.0.0.0", "8080"]
 END
@@ -90,12 +90,10 @@ services:
       context: .
     volumes:
       - ./:/shared/folder # Текущая директория
-      - ./config.txt:/etc/file-config.txt:ro
   file-server-2:
     build:
       context: .
     volumes:
-      - ./config.txt:/etc/file-config.txt:ro
       - /etc:/shared/folder # Директория /etc
   proxy:
     image: nginx:1.17

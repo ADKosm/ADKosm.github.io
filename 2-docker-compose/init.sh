@@ -102,3 +102,5 @@ services:
     ports:
       - 8888:8888
 END
+
+echo "Success!"

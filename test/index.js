@@ -15,8 +15,15 @@ function setup() {
     noCanvas();
 
     // Получаем видеопоток с камеры и выводим его на страницу
-    videostream = createCapture('video');
-    videostream.play();
+    videostream = createCapture({
+      audio: false,
+      video: {
+        facingMode: {
+          exact: "environment"
+        }
+      }
+    });
+    // videostream = createCapture('video');
 
     // Создаем элемент, в котором будем рисовать предсказание
     labelBox = createElement('h2', 'Prediction');
